@@ -3,15 +3,21 @@ using Leopotam.EcsLite.Di;
 using UnityEngine;
 
 namespace Client {
-    sealed class RushSystem : IEcsRunSystem 
+    sealed class RushSystem : IEcsInitSystem, IEcsRunSystem 
     {
         private EcsPoolInject<RushCmp> _rushCmpPool;
         private EcsPoolInject<UnitCmp> _unitCmpPool;
-        private EcsFilterInject<Inc<RushCmp>> _rushFilter;
+        private EcsFilter _rushFilter;
+
+        public void Init(IEcsSystems systems)
+        {
+            EcsWorld world = systems.GetWorld();
+            _rushFilter = world.Filter<RushCmp>().Inc<UnitCmp>().End();
+        }
 
         public void Run(IEcsSystems systems)
         {
-            foreach (int entity in _rushFilter.Value)
+            foreach (int entity in _rushFilter)
             {
                 ref RushCmp rushCmp = ref _rushCmpPool.Value.Get(entity);
                 bool actiovation = rushCmp.IsActiovate;
